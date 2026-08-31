@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Censo Prep '31 — Parte 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FFF6E4;
+    --ink:#17213E;
+    --coral:#FF5C58;
+    --mustard:#FFB100;
+    --teal:#1F9C8C;
+    --grape:#7B5EA7;
+    --line: rgba(23,33,62,0.14);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Space Grotesk', sans-serif;
+    overflow-x:hidden;
+  }
+  h1,h2,h3, .display{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    letter-spacing:-0.01em;
+  }
+  .wrap{max-width:760px;}
+
+  /* ---------- HERO ---------- */
+  #hero{
+    min-height:88svh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    padding: 6rem 8vw 4rem;
+    background:var(--ink);
+    color:var(--paper);
+  }
+  #hero .eyebrow{
+    font-size:0.95rem;
+    color:var(--mustard);
+    margin-bottom:1.2rem;
+    font-weight:500;
+  }
+  #hero h1{
+    font-size:clamp(2.6rem, 8vw, 5.6rem);
+    line-height:0.97;
+    max-width:15ch;
+  }
+  #hero h1 em{
+    font-style:italic;
+    color:var(--coral);
+  }
+  #hero p{
+    margin-top:1.6rem;
+    font-size:1.1rem;
+    max-width:46ch;
+    color:rgba(255,246,228,0.8);
+    line-height:1.55;
+  }
+  .n-badge{
+    display:inline-flex;
+    align-items:baseline;
+    gap:0.5rem;
+    margin-top:2.2rem;
+    padding: 0.65rem 1.3rem;
+    border:1.5px solid rgba(255,246,228,0.35);
+    border-radius:999px;
+    width:fit-content;
+    font-size:0.92rem;
+  }
+  .n-badge b{font-family:'Fraunces', serif; font-size:1.25rem; color:var(--mustard);}
+
+  /* ---------- TABS ---------- */
+  #tabbar{
+    position:sticky; top:0; z-index:50;
+    background:var(--paper);
+    border-bottom:2px solid var(--ink);
+    padding: 0.9rem 8vw;
+    display:flex;
+    gap:0.7rem;
+  }
+  .tabbtn{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:0.95rem;
+    font-weight:600;
+    padding:0.65rem 1.3rem;
+    border-radius:999px;
+    border:1.5px solid var(--ink);
+    background:transparent;
+    color:var(--ink);
+    cursor:pointer;
+    transition: background 0.25s ease, color 0.25s ease;
+  }
+  .tabbtn.active{
+    background:var(--ink);
+    color:var(--paper);
+  }
+  .tabbtn:not(.active):hover{
+    background:rgba(23,33,62,0.06);
+  }
+
+  .tabpanel{display:none;}
+  .tabpanel.active{display:block;}
+
+  /* ---------- RESULTS TAB (forms-style) ---------- */
+  #resultados{
+    padding: 3.5rem 8vw 5rem;
+  }
+  #resultados > .intro{max-width:640px; margin-bottom:3rem;}
+  #resultados > .intro p{color:rgba(23,33,62,0.75); line-height:1.6; font-size:1.02rem;}
+  .qgrid{display:flex; flex-direction:column; gap:2.2rem; max-width:680px;}
+  .formscard{
+    border:1.5px solid var(--ink);
+    border-radius:20px;
+    padding:1.8rem 1.9rem 1.6rem;
+    background:#fff;
+  }
+  .formscard .qtitle{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:1.15rem;
+    line-height:1.35;
+    margin-bottom:0.3rem;
+  }
+  .formscard .qmeta{
+    font-size:0.8rem;
+    color:rgba(23,33,62,0.55);
+    margin-bottom:1.4rem;
+  }
+  .frow{margin-bottom:1rem;}
+  .frow:last-child{margin-bottom:0;}
+  .frow-top{display:flex; justify-content:space-between; align-items:baseline; gap:0.6rem; margin-bottom:0.3rem;}
+  .frow-top .flabel{font-size:0.92rem; line-height:1.3;}
+  .frow-top .fval{font-family:'Fraunces', serif; font-weight:600; font-size:0.95rem; white-space:nowrap; color:rgba(23,33,62,0.55);}
+  .ftrack{height:1.7rem; border-radius:8px; background:rgba(23,33,62,0.06); overflow:hidden; position:relative;}
+  .ffill{
+    height:100%;
+    width:0%;
+    border-radius:8px;
+    transition: width 1.1s cubic-bezier(.2,.8,.2,1);
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    padding-right:0.55rem;
+  }
+  .ffill span{
+    font-size:0.78rem;
+    font-weight:600;
+    color:var(--paper);
+    opacity:0;
+    transition: opacity 0.4s ease 0.6s;
+    white-space:nowrap;
+  }
+  .ffill.show span{opacity:1;}
+
+  /* ---------- ANALYSIS TAB ---------- */
+  #analise{padding-bottom:2rem;}
+  #analise section{
+    padding: 5rem 8vw;
+    border-bottom: 2px solid var(--ink);
+  }
+  #analise section:last-child{border-bottom:none;}
+  .tag{
+    display:inline-block;
+    font-size:0.8rem;
+    padding:0.3rem 0.8rem;
+    border-radius:999px;
+    border:1.5px solid var(--ink);
+    margin-bottom:1.6rem;
+  }
+  #analise section h2{
+    font-size:clamp(1.6rem, 3vw, 2.3rem);
+    line-height:1.18;
+    margin-bottom:1rem;
+    max-width:20ch;
+  }
+  #analise section .lede{
+    font-size:1.04rem;
+    line-height:1.6;
+    color:rgba(23,33,62,0.82);
+    max-width:56ch;
+  }
+  .insight{
+    margin-top:1.8rem;
+    padding: 1.2rem 1.4rem;
+    background:rgba(23,33,62,0.05);
+    border-left:3px solid var(--coral);
+    font-size:0.98rem;
+    line-height:1.55;
+    max-width:56ch;
+  }
+  .insight b{font-weight:600;}
+
+  .pictogrid{
+    display:flex; flex-wrap:wrap; gap:0.5rem;
+    margin: 2.2rem 0 1.4rem; max-width:560px;
+  }
+  .pictogrid span{font-size:1.5rem; line-height:1; opacity:0.92;}
+  .legend{display:flex; gap:1.8rem; flex-wrap:wrap; font-size:0.9rem; margin-top:0.2rem;}
+  .legend .item{display:flex; align-items:center; gap:0.5rem;}
+
+  .pair{display:flex; gap:3rem; flex-wrap:wrap; margin-top:2.2rem;}
+  .pair .col{flex:1; min-width:200px;}
+  .pair .col .num{font-family:'Fraunces', serif; font-weight:700; font-size:clamp(2.2rem,4.6vw,3.2rem); line-height:1;}
+  .pair .col .lbl{margin-top:0.5rem; font-size:0.92rem; color:rgba(23,33,62,0.7);}
+
+  .schoolgrid{display:flex; flex-wrap:wrap; gap:0.9rem; margin-top:2.2rem; max-width:640px;}
+  .school-chip{border:1.5px solid var(--ink); border-radius:16px; padding:0.9rem 1.1rem; min-width:130px;}
+  .school-chip .name{font-family:'Fraunces', serif; font-weight:600; font-size:1.02rem;}
+  .school-chip .meta{font-size:0.78rem; margin-top:0.4rem; color:rgba(23,33,62,0.65); line-height:1.4;}
+
+  #s-pets{background:var(--paper);}
+  #s-coca{background:#1F9C8C1A;}
+  #s-advisor{background:var(--ink); color:var(--paper);}
+  #s-advisor .lede{color:rgba(255,246,228,0.82);}
+  #s-advisor .insight{background:rgba(255,246,228,0.08); border-left-color:var(--mustard); color:rgba(255,246,228,0.92);}
+  #s-medo{background:#FF5C581A;}
+  #s-honor{background:var(--paper);}
+  #s-schools{background:var(--paper);}
+  #s-correlacao{background:#FFB1001A;}
+  #s-inseguro{background:var(--paper);}
+
+  footer{
+    padding:5rem 8vw 4rem;
+    background:var(--ink);
+    color:rgba(255,246,228,0.75);
+    text-align:center;
+  }
+  footer .display{color:var(--paper); font-size:1.5rem; margin-bottom:1rem;}
+  footer p{max-width:52ch; margin:0 auto 0.6rem; font-size:0.95rem; line-height:1.6;}
+  footer .fine{font-size:0.76rem; color:rgba(255,246,228,0.45); margin-top:2rem;}
+
+  @media(max-width:640px){
+    #resultados, #analise section{padding-left:6vw; padding-right:6vw;}
+    #tabbar{padding-left:6vw; padding-right:6vw;}
+    .pair{gap:1.6rem;}
+    .formscard{padding:1.4rem 1.3rem;}
+  }
+</style>
+</head>
+<body>
+
+<section id="hero">
+  <div class="eyebrow">CENSO PREP '31 · PARTE 2</div>
+  <h1>o que 34 pessoas<br>revelaram sem<br>querer <em>revelar</em>.</h1>
+  <p>Coca-cola, cachorro vs. gato, quantas horas todo mundo realmente estuda e o que isso tem a ver com a sua dream school. Escolhe aí embaixo se quer ver as respostas cruas ou os padrões escondidos nelas.</p>
+  <div class="n-badge">respondentes <b>34</b></div>
+</section>
+
+<div id="tabbar">
+  <button class="tabbtn active" data-tab="resultados">Ver respostas</button>
+  <button class="tabbtn" data-tab="analise">Análise de dados</button>
+</div>
+
+<!-- ======================= TAB 1: RESULTADOS ======================= -->
+<div id="resultados" class="tabpanel active">
+  <div class="intro">
+    <p>Do jeitinho que o Google Forms mostra: pergunta por pergunta, com a distribuição real das 34 respostas.</p>
+  </div>
+  <div class="qgrid" id="qgrid"></div>
+</div>
+
+<!-- ======================= TAB 2: ANÁLISE ======================= -->
+<div id="analise" class="tabpanel">
+
+  <section id="s-pets">
+    <div class="wrap">
+      <span class="tag">time cachorro vs. time gato</span>
+      <h2>79% da mentoria é time cachorro. Só isso já explica muita coisa.</h2>
+      <p class="lede">27 pessoas de cachorro, 7 de gato. Uma disputa que nem foi disputa.</p>
+      <div class="pictogrid" id="petgrid"></div>
+      <div class="legend">
+        <div class="item"><span style="font-size:1.05rem;">🐶</span> cachorro — 27</div>
+        <div class="item"><span style="font-size:1.05rem;">🐱</span> gato — 7</div>
+      </div>
+      <div class="insight">E tem mais: quem é time cachorro tira, em média, <b>706 em Math e 686 em R&W</b> — contra <b>650 e 633</b> do time gato. Não é papo científico (a amostra é pequena), mas dá pra jogar isso pra cima de algum amigo gateiro.</div>
+    </div>
+  </section>
+
+  <section id="s-coca">
+    <div class="wrap">
+      <span class="tag">coca-cola</span>
+      <h2>Quem toma coca normal estuda mais que quem toma zero.</h2>
+      <p class="lede">44% não toma coca, 41% toma zero e só 15% toma normal — mas é esse grupo pequeno que mais estuda.</p>
+      <div class="pair">
+        <div class="col">
+          <div class="num">4,1h</div>
+          <div class="lbl">média de estudo/dia — time coca normal</div>
+        </div>
+        <div class="col">
+          <div class="num">3,1h</div>
+          <div class="lbl">média de estudo/dia — time coca zero</div>
+        </div>
+      </div>
+      <div class="insight">Açúcar talvez seja o verdadeiro pré-workout dos vestibulandos.</div>
+    </div>
+  </section>
+
+  <section id="s-advisor">
+    <div class="wrap">
+      <span class="tag">o mvp da mentoria</span>
+      <h2>91% ama o advisor. O mentor também é querido, mas perde de longe.</h2>
+      <div class="pair">
+        <div class="col">
+          <div class="num">91%</div>
+          <div class="lbl">curte o advisor</div>
+        </div>
+        <div class="col">
+          <div class="num">74%</div>
+          <div class="lbl">curte o mentor</div>
+        </div>
+        <div class="col">
+          <div class="num">76%</div>
+          <div class="lbl">diz que o advisor foi quem mais ajudou até agora</div>
+        </div>
+      </div>
+      <div class="insight">Pra comparar: mentor, materiais e aulas somados ficam com só <b>21%</b> dos votos de "o que mais ajudou". O advisor é, isoladamente, o MVP do Prep.</div>
+    </div>
+  </section>
+
+  <section id="s-medo">
+    <div class="wrap">
+      <span class="tag">maior medo</span>
+      <h2>O SAT é o vilão oficial da turma.</h2>
+      <p class="lede">47% tem mais medo do SAT do que de qualquer outra parte da aplicação — mais que o dobro do segundo colocado, "não entrar em nenhuma da lista" (26%).</p>
+    </div>
+  </section>
+
+  <section id="s-honor">
+    <div class="wrap">
+      <span class="tag">honors internacionais</span>
+      <h2>Ter uma honra "meia-boca" mexe mais com a cabeça do que não ter nenhuma.</h2>
+      <p class="lede">59% tem uma honor internacional, 26% tem mas acha ela fraca, e 15% simplesmente não tem nenhuma.</p>
+      <div class="pair">
+        <div class="col">
+          <div class="num">60%</div>
+          <div class="lbl">de quem <b>não tem</b> nenhuma honor se sente com perfil forte</div>
+        </div>
+        <div class="col">
+          <div class="num">33%</div>
+          <div class="lbl">de quem tem uma honor mas <b>acha ela ruim</b> se sente com perfil forte</div>
+        </div>
+      </div>
+      <div class="insight">Ou seja: é mais tranquilo não ter honor nenhuma do que ter uma e viver desconfiando dela. Comparação é ladrão da alegria também no college process.</div>
+    </div>
+  </section>
+
+  <section id="s-schools">
+    <div class="wrap">
+      <span class="tag">dream schools</span>
+      <h2>Brown lidera o ranking de sonhos, mas Stanford tem o time mais eficiente.</h2>
+      <p class="lede">Entre quem já tem uma dream school clara, esse é o mapa de quem sonha com o quê — e quanto cada grupo estuda por dia.</p>
+      <div class="schoolgrid" id="schoolgrid"></div>
+      <div class="insight">Curiosidade: a galera que sonha com <b>Stanford</b> estuda em média só <b>1h9-2h/dia</b> e tem a maior média de Math (750). Já quem sonha com <b>Yale</b> estuda o dobro (5h/dia). Duas estratégias bem diferentes pra chegar no mesmo lugar: uma Ivy/afins.</div>
+    </div>
+  </section>
+
+  <section id="s-correlacao">
+    <div class="wrap">
+      <span class="tag">o gráfico mais estranho do censo</span>
+      <h2>Quem estuda 4h+ por dia tira, em média, notas mais baixas no DET e no R&W.</h2>
+      <p class="lede">Contraintuitivo, né? Antes do pânico: isso não quer dizer que estudar prejudica ninguém.</p>
+      <div class="pair">
+        <div class="col">
+          <div class="num">125</div>
+          <div class="lbl">DET médio de quem estuda <b>4h+/dia</b></div>
+        </div>
+        <div class="col">
+          <div class="num">137</div>
+          <div class="lbl">DET médio de quem estuda <b>menos de 4h/dia</b></div>
+        </div>
+      </div>
+      <div class="pair">
+        <div class="col">
+          <div class="num">630</div>
+          <div class="lbl">R&W médio de quem estuda <b>4h+/dia</b></div>
+        </div>
+        <div class="col">
+          <div class="num">698</div>
+          <div class="lbl">R&W médio de quem estuda <b>menos de 4h/dia</b></div>
+        </div>
+      </div>
+      <div class="insight">O mais provável é o caminho contrário: quem já está com a nota mais baixa aumenta as horas de estudo pra tentar compensar. A nota não vem de quantas horas você senta pra estudar — vem do que rola dentro delas. Qualidade > quantidade, como sempre.</div>
+    </div>
+  </section>
+
+  <section id="s-inseguro">
+    <div class="wrap">
+      <span class="tag">insegurança geral</span>
+      <h2>SAT, honors e financial aid são os pontos que mais tiram o sono da mentoria.</h2>
+      <p class="lede">65% marcou SAT/ACT como um aspecto que deixa insegurança, seguido de Honors/Awards (41%) e Financial Aid (38%). Pergunta era de múltipla escolha, então os números não somam 100%.</p>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <div class="display">é isso, gente.</div>
+  <p>Amostra pequena (34 respostas), zero rigor estatístico, 100% verdade sobre a nossa turma. Se você se reconheceu em algum desses padrões, meme liberado.</p>
+  <p class="fine">Censo Prep '31 · Parte 2 — feito a partir das respostas reais da mentoria.</p>
+</footer>
+
+<script>
+  // ================= TABS =================
+  const tabbtns = document.querySelectorAll('.tabbtn');
+  const panels = { resultados: document.getElementById('resultados'), analise: document.getElementById('analise') };
+  tabbtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      tabbtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      Object.values(panels).forEach(p => p.classList.remove('active'));
+      const target = panels[btn.dataset.tab];
+      target.classList.add('active');
+      if (btn.dataset.tab === 'resultados') animateForms();
+    });
+  });
+
+  // ================= PET PICTOGRAM =================
+  const petGrid = document.getElementById('petgrid');
+  Array(27).fill('🐶').concat(Array(7).fill('🐱')).forEach(e => {
+    const s = document.createElement('span'); s.textContent = e; petGrid.appendChild(s);
+  });
+
+  // ================= SCHOOL CHIPS =================
+  const schools = [
+    {name:'Brown', n:6, horas:'~3,7h/dia'},
+    {name:'Stanford', n:5, horas:'~1,9h/dia'},
+    {name:'Columbia', n:3, horas:'~2h/dia'},
+    {name:'Dartmouth', n:2, horas:'~3h/dia'},
+    {name:'Yale', n:2, horas:'~5h/dia'},
+    {name:'MIT', n:2, horas:'~2,3h/dia'},
+    {name:'UPenn', n:2, horas:'—'},
+  ];
+  const sg = document.getElementById('schoolgrid');
+  schools.forEach(s => {
+    const chip = document.createElement('div');
+    chip.className = 'school-chip';
+    chip.innerHTML = `<div class="name">${s.name}</div><div class="meta">${s.n} sonhadores<br>${s.horas} de estudo</div>`;
+    sg.appendChild(chip);
+  });
+
+  // ================= FORMS-STYLE QUESTION DATA =================
+  const palette = ['#FF5C58', '#FFB100', '#1F9C8C', '#7B5EA7', '#17213E', '#E0854A'];
+
+  const questions = [
+    {
+      title: "Coca-cola zero ou coca-cola normal?",
+      meta: "34 respostas",
+      options: [
+        {label:'Não tomo coca', count:15, pct:44},
+        {label:'Zero', count:14, pct:41},
+        {label:'Normal', count:5, pct:15},
+      ]
+    },
+    {
+      title: "Você prefere gato ou cachorro?",
+      meta: "34 respostas",
+      options: [
+        {label:'Cachorro', count:27, pct:79},
+        {label:'Gato', count:7, pct:21},
+      ]
+    },
+    {
+      title: "Quantas horas por dia você costuma estudar para o Prep/aplicações?",
+      meta: "34 respostas",
+      options: [
+        {label:'2h-4h', count:12, pct:35},
+        {label:'1h-2h', count:8, pct:24},
+        {label:'4h-6h', count:7, pct:21},
+        {label:'6h+', count:5, pct:15},
+        {label:'Menos de 1h', count:2, pct:6},
+      ]
+    },
+    {
+      title: "O que você considera que mais te ajudou no Prep até agora?",
+      meta: "34 respostas",
+      options: [
+        {label:'Advisor', count:26, pct:76},
+        {label:'Mentor', count:3, pct:9},
+        {label:'Materiais', count:3, pct:9},
+        {label:'Aulas', count:1, pct:3},
+        {label:'Suporte mental (psicólogos, prep team, peers)', count:1, pct:3},
+      ]
+    },
+    {
+      title: "Você tem gostado do seu mentor?",
+      meta: "34 respostas",
+      options: [
+        {label:'Sim', count:25, pct:74},
+        {label:'Mais ou menos', count:5, pct:15},
+        {label:'Não', count:4, pct:12},
+      ]
+    },
+    {
+      title: "Você tem gostado do seu advisor?",
+      meta: "34 respostas",
+      options: [
+        {label:'Sim', count:31, pct:91},
+        {label:'Mais ou menos', count:3, pct:9},
+      ]
+    },
+    {
+      title: "Você sente que seu perfil é forte o suficiente para as universidades que pretende aplicar?",
+      meta: "33 respostas",
+      options: [
+        {label:'Sim', count:18, pct:55},
+        {label:'Não :(', count:15, pct:45},
+      ]
+    },
+    {
+      title: "Qual é o seu maior medo em relação à application?",
+      meta: "34 respostas",
+      options: [
+        {label:'Não conseguir uma boa nota no SAT', count:16, pct:47},
+        {label:'Não entrar em nenhuma universidade da minha lista', count:9, pct:26},
+        {label:'Não conseguir bolsa/financial aid', count:6, pct:18},
+        {label:'Todos (kkkk)', count:1, pct:3},
+        {label:'Tudo!!!', count:1, pct:3},
+        {label:'Prazos / organização', count:1, pct:3},
+      ]
+    },
+    {
+      title: "Você tem alguma honor internacional?",
+      meta: "34 respostas",
+      options: [
+        {label:'Sim', count:20, pct:59},
+        {label:'Sim, mas acho ela ruim', count:9, pct:26},
+        {label:'Não', count:5, pct:15},
+      ]
+    },
+    {
+      title: "Qual seu range de nota em R&W?",
+      meta: "31 respostas",
+      options: [
+        {label:'601–700', count:20, pct:65},
+        {label:'701–800', count:10, pct:32},
+        {label:'401–500', count:1, pct:3},
+      ]
+    },
+    {
+      title: "Qual seu range de nota em Math?",
+      meta: "31 respostas",
+      options: [
+        {label:'701–800', count:17, pct:55},
+        {label:'601–700', count:11, pct:35},
+        {label:'501–600', count:3, pct:10},
+      ]
+    },
+    {
+      title: "Qual é o seu range de nota no DET?",
+      meta: "31 respostas",
+      options: [
+        {label:'126–135', count:11, pct:35},
+        {label:'136–145', count:10, pct:32},
+        {label:'116–125', count:6, pct:19},
+        {label:'146–160', count:3, pct:10},
+        {label:'106–115', count:1, pct:3},
+      ]
+    },
+    {
+      title: "Sobre quais aspectos da sua aplicação você se sente inseguro?",
+      meta: "34 respostas · múltipla escolha, não soma 100%",
+      options: [
+        {label:'SAT/ACT', count:22, pct:65},
+        {label:'Honors / Awards', count:14, pct:41},
+        {label:'Financial Aid', count:13, pct:38},
+        {label:'Essays', count:12, pct:35},
+        {label:'Notas/GPA', count:12, pct:35},
+        {label:'Inglês / proficiência', count:9, pct:26},
+        {label:'Extracurriculares', count:9, pct:26},
+        {label:'College list', count:9, pct:26},
+        {label:'Perfil acadêmico', count:7, pct:21},
+        {label:'Cartas de recomendação', count:7, pct:21},
+      ]
+    },
+    {
+      title: "Qual é a sua dream school?",
+      meta: "26 respostas com escola definida",
+      options: [
+        {label:'Brown', count:6, pct:23},
+        {label:'Stanford', count:5, pct:19},
+        {label:'Columbia', count:3, pct:12},
+        {label:'Dartmouth', count:2, pct:8},
+        {label:'Yale', count:2, pct:8},
+        {label:'MIT', count:2, pct:8},
+        {label:'UPenn', count:2, pct:8},
+        {label:'Duke', count:1, pct:4},
+        {label:'Harvard', count:1, pct:4},
+        {label:'Rice', count:1, pct:4},
+        {label:'UMiami', count:1, pct:4},
+      ]
+    },
+  ];
+
+  const qgrid = document.getElementById('qgrid');
+  questions.forEach(q => {
+    const card = document.createElement('div');
+    card.className = 'formscard';
+    const max = Math.max(...q.options.map(o => o.count));
+    let rowsHtml = '';
+    q.options.forEach((o, i) => {
+      const color = palette[i % palette.length];
+      rowsHtml += `
+        <div class="frow">
+          <div class="frow-top">
+            <span class="flabel">${o.label}</span>
+            <span class="fval">${o.count} · ${o.pct}%</span>
+          </div>
+          <div class="ftrack">
+            <div class="ffill" data-width="${(o.count/max*100)}" style="background:${color}"><span>${o.pct}%</span></div>
+          </div>
+        </div>`;
+    });
+    card.innerHTML = `<div class="qtitle">${q.title}</div><div class="qmeta">${q.meta}</div>${rowsHtml}`;
+    qgrid.appendChild(card);
+  });
+
+  function animateForms(){
+    const fills = document.querySelectorAll('#qgrid .ffill');
+    fills.forEach((f, i) => {
+      f.style.width = '0%';
+      f.classList.remove('show');
+      setTimeout(() => {
+        f.style.width = f.dataset.width + '%';
+        f.classList.add('show');
+      }, 40 * i);
+    });
+  }
+  // run once on load since "resultados" is the default active tab
+  animateForms();
+</script>
+
+</body>
+</html>
